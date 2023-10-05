@@ -1,9 +1,8 @@
 {
-    "email": "correo@example.com",
-    "password": "contraseña123",
-    "api_key": "miApiKey123",
-    "notificaciones": true,
-    "idioma": "es",
-    "tema": "claro"
-  }
-  
+  "email": "correo@example.com",
+  "password": "wec",
+  "api_key": "miApiKey123",
+  "notificaciones": true,
+  "idioma": "es",
+  "tema": "claro"
+}
