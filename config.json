@@ -1,4 +1,13 @@
 {
-  "email": "",
-  "password": ""
+  "email": "telmo",
+  "password": "nuevo",
+  "api_key": "miApiKey123",
+  "notificaciones": true,
+  "idioma": "es",
+  "tema": "claro",
+  "servertoken": "tk7qIy1OC89TyExQhcA6XfXFfZ27edBKrO7L5lxohRvUsTXFeXus4j1fRSiSTQch",
+  "iontoken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5OGNjZDg0Zi05NmYyLTQ4OTMtYjgyOC1mMDY4MTE5ZWI3ZGUiLCJpZCI6MTY3NTA4LCJpYXQiOjE2OTUxOTY0ODF9.easShYAmunNxH9yeX-wD0sLUWa1IBhg_qPRKueqJnnA",
+  "opensky_username": "telmomm",
+  "opensky_password": "nyvriv-zaxma7-cerxEp",
+  "city": "Burgos"
 }
