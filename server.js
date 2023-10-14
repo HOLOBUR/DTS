@@ -11,26 +11,6 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(bodyParser.json());
 
-// Conectar a MongoDB Atlas usando Mongoose
-//mongoose.connect(process.env.MONGODB_URI, {
-mongoose.connect("mongodb+srv://dts-server:ZOW24osi@dts-server.t8ah0ib.mongodb.net/sample_analytics?authMechanism=SCRAM-SHA-1", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-  .then(() => {
-    console.log('Conexión exitosa a MongoDB Atlas');
-  })
-  .catch((err) => {
-    console.error('Error al conectar a MongoDB Atlas', err);
-  });
-
-// Define el modelo de datos de configuración en MongoDB
-const configSchema = new mongoose.Schema({
-  key: String,
-  value: String,
-});
-const Config = mongoose.model('Config', configSchema);
-
 // Middleware para verificar el encabezado "Authorization"
 function checkAuthorization(req, res, next) {
   const authHeader = req.headers['authorization'];
@@ -43,29 +23,47 @@ function checkAuthorization(req, res, next) {
   }
 }
 
-const schema = new mongoose.Schema({
-  account_id: Number,
-  limit: Number,
-  products: [String], // El campo "products" es un array de strings
+const cityDatabase = mongoose.createConnection(process.env.MONGODB_URI + process.env.CITYNAME + process.env.MONGODB_AUTH, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
 });
 
-const Accounts = mongoose.model('accounts', schema);
-
-// Ruta para obtener todas las propiedades
-app.get('/properties', async (req, res) => {
-  try {
-    const properties = await Accounts.find();
-    res.json(properties);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Error al obtener las propiedades desde MongoDB');
-  }
+const webcamSchema = new mongoose.Schema({
+  name: String,
+  isOK: Boolean,
+  visible: Boolean,
+  isVideo: Boolean,
+  url: String,
+  location: {
+    Longitude: Number,
+    Latitude: Number,
+    Height: Number
+  },
+  additionalInfo: {}
 });
 
-// Ruta para obtener la configuración desde MongoDB
-app.get('/config', checkAuthorization, async (req, res) => {
+const webcamModel = cityDatabase.model('webcam', webcamSchema, 'webcams')
+
+app.get('/webcam', checkAuthorization, async (req, res) => {
   try {
-    const configData = await Config.find();
+    // Recupera la lista de campos que se deben devolver desde la cabecera "X-Fields"
+    const fieldsHeader = req.get('X-Fields');
+
+    if (!fieldsHeader) {
+      return res.status(400).send('Falta el encabezado X-Fields en la solicitud.');
+    }
+
+    // Convierte la lista de campos en un objeto de proyección
+    const fieldsArray = fieldsHeader.split(',');
+    const projection = fieldsArray.reduce((obj, field) => {
+      obj[field] = 1; // 1 indica que se incluirá este campo
+      return obj;
+    }, {});
+
+    const conditions = { isOK: true, visible: true };
+
+    // Realiza la consulta con las condiciones y la proyección de campos
+    const configData = await webcamModel.find(conditions, projection);
     res.json(configData);
   } catch (error) {
     console.error(error);
@@ -73,20 +71,6 @@ app.get('/config', checkAuthorization, async (req, res) => {
   }
 });
 
-// Ruta para actualizar la configuración en MongoDB
-app.post('/config', checkAuthorization, async (req, res) => {
-  try {
-    const configData = req.body;
-
-    // Actualiza o crea un nuevo documento de configuración
-    await Config.findOneAndUpdate({}, configData, { upsert: true });
-
-    res.status(200).send('Configuración actualizada con éxito');
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Error al guardar la configuración en MongoDB');
-  }
-});
 
 // Iniciar el servidor
 app.listen(port, () => {
